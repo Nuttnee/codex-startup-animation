@@ -64,3 +64,6 @@ body.embedded .end-screen,body.native.launch-mode.closing .end-screen{visibility
 .settings-description{margin:10px 0 16px}.text-settings{margin-top:14px;gap:10px 16px}
 .wallpaper-setting{margin-top:14px}#settings-status{margin:12px 0 10px;min-height:32px}#restore-appearance{margin-top:12px}
 @media(max-width:480px){.image-choices{grid-template-columns:1fr}.image-choice>img{height:110px}.boot-caption{font-size:7px;letter-spacing:1px}}
+
+/* Black hole theme: smooth imagery and warm accretion-disk accents. */
+.avatar{image-rendering:auto}.avatar-frame{border-color:#c69b56;box-shadow:0 0 22px #d98b2622}.avatar-frame:before,.avatar-frame:after{border-color:#e6ba76}.scene{background:#030405}.boot-title{color:#fff1d5}

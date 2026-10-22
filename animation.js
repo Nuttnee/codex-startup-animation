@@ -308,15 +308,15 @@
   let savedImages={},pendingImages={},busy=false;
   const settings=$('#settings-dialog'),status=$('#settings-status');
   const textFields=[
-    {key:'introTitle',input:'#intro-title',target:'.boot-title',fallback:'Bông tuyết bay',limit:16},
-    {key:'introCaption',input:'#intro-caption',target:'.boot-caption',fallback:'KHỞI ĐỘNG CODEX / LOẠI-0',limit:48},
-    {key:'artworkSubtitle',input:'#artwork-subtitle',target:'#subtitle',fallback:'Người bạn đồng hành… đã đến bên bạn',limit:60}
+    {key:'introTitle',input:'#intro-title',target:'.boot-title',fallback:'HỐ ĐEN',limit:16},
+    {key:'introCaption',input:'#intro-caption',target:'.boot-caption',fallback:'CODEX / CHÂN TRỜI SỰ KIỆN',limit:48},
+    {key:'artworkSubtitle',input:'#artwork-subtitle',target:'#subtitle',fallback:'Khám phá phía bên kia chân trời sự kiện',limit:60}
   ];
   const textValue=(images,field)=>typeof images[field.key]==='string'?images[field.key].slice(0,field.limit):field.fallback;
   function thumbnails(){
     $('#avatar-preview').src=pendingImages.avatar||assets.avatar;
     $('#artwork-preview').src=pendingImages.artwork||assets.artwork;
-    $('#wallpaper-strength').value=String(pendingImages.wallpaperStrength??42);
+    $('#wallpaper-strength').value=String(pendingImages.wallpaperStrength??55);
     $('#wallpaper-value').textContent=$('#wallpaper-strength').value+'%';
     for(const field of textFields)$(field.input).value=textValue(pendingImages,field);
   }
@@ -338,7 +338,7 @@
     if(!paths.length)throw new Error('Thiếu dữ liệu nét vẽ của ảnh');
     for(const field of textFields)$(field.target).textContent=textValue(images,field);
     $('.boot-title').classList.toggle('long-title',Array.from(textValue(images,textFields[0])).length>6);
-    send('background',{image:art.src,strength:images.wallpaperStrength??42});
+    send('background',{image:art.src,strength:images.wallpaperStrength??55});
   }
   for(const field of textFields)$(field.input).addEventListener('input',event=>{
     pendingImages[field.key]=event.target.value.slice(0,field.limit);
@@ -375,6 +375,11 @@
     finally{setBusy(false);}
   });
   window.imageSettings.load().catch(()=>({})).then(async images=>{
+    // Apply this theme once, preserving subsequent user customizations.
+    if(images.theme!=='black-hole-v1'){
+      images={...images,theme:'black-hole-v1',avatar:undefined,artwork:undefined,contours:undefined,introTitle:undefined,introCaption:undefined,artworkSubtitle:undefined,wallpaperStrength:55};
+      await window.imageSettings.save(images).catch(()=>{});
+    }
     savedImages=images;
     try{await applyImages(images);}catch{savedImages={};await applyImages({});}
     ready();
