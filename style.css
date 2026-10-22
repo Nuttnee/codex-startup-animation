@@ -70,3 +70,6 @@ body.embedded .end-screen,body.native.launch-mode.closing .end-screen{visibility
 
 /* Ice-blue orbital identity: no rose tint or chromatic text shadow. */
 .intro{color:#71d8ff}.dial{stroke:#71d8ff}.dial .dashed{stroke:#588da7}.crosshair{stroke:#b3e4f5}.wave{stroke:#7ddfff}.avatar-frame{border-color:#5cbad9;box-shadow:0 0 24px #36c6ff18}.avatar-frame:before,.avatar-frame:after{border-color:#78d8f3}.boot-title{color:#e6faff;text-shadow:0 0 22px #65d4ff30}.boot-caption{color:#8db9cd}.boot-corners .corner{border-color:#429fc2}.reticle{border-color:#5c8fa5}
+
+/* Composite the large layers; do not redraw geometry during transitions. */
+.intro,.identity,.avatar-frame,.pulse i,.dial .dashed,.wave,.boot-title,.line-art{will-change:transform,opacity}.line-art{transform-origin:center}.scene{will-change:opacity}.boot-title{clip-path:none}
