@@ -43,21 +43,21 @@
     return new Promise((resolve,reject)=>{
       const open=indexedDB.open('aemeath-startup-images',1);
       open.onupgradeneeded=()=>open.result.createObjectStore('settings');
-      open.onerror=()=>reject(open.error);
+      open.onerror=()=>reject(new Error('Không mở được bộ nhớ cài đặt trên máy.'));
       open.onsuccess=()=>{
         const db=open.result,tx=db.transaction('settings',action==='read'?'readonly':'readwrite'),store=tx.objectStore('settings');
         const request=action==='read'?store.get('images'):store.put(value,'images');
         tx.oncomplete=()=>{db.close();resolve(action==='read'?request.result||{}:value);};
-        tx.onerror=tx.onabort=()=>{db.close();reject(tx.error||new Error('保存失败'));};
+        tx.onerror=tx.onabort=()=>{db.close();reject(new Error('Không lưu được cài đặt. Hãy kiểm tra dung lượng trống trên máy.'));};
       };
     });
   }
   async function importImage(file,kind){
-    if(file.size>30*1024*1024)throw new Error('请选择小于 30 MB 的图片。');
-    if(!['image/png','image/jpeg','image/webp'].includes(file.type))throw new Error('请选择 PNG、JPEG 或 WebP 图片。');
+    if(file.size>30*1024*1024)throw new Error('Vui lòng chọn ảnh nhỏ hơn 30 MB.');
+    if(!['image/png','image/jpeg','image/webp'].includes(file.type))throw new Error('Vui lòng chọn ảnh PNG, JPEG hoặc WebP.');
     const url=URL.createObjectURL(file),img=new Image();
     try{
-      img.src=url;await img.decode();
+      img.src=url;await img.decode().catch(()=>{throw new Error('Không đọc được ảnh. Vui lòng chọn ảnh khác.');});
       const canvas=document.createElement('canvas');canvas.width=kind==='avatar'?512:1536;canvas.height=kind==='avatar'?512:1024;
       const ctx=canvas.getContext('2d');ctx.fillStyle='#08060d';ctx.fillRect(0,0,canvas.width,canvas.height);
       const scale=Math.max(canvas.width/img.naturalWidth,canvas.height/img.naturalHeight);
@@ -68,9 +68,9 @@
       const small=document.createElement('canvas');small.width=768;small.height=512;
       const smallCtx=small.getContext('2d',{willReadFrequently:true});smallCtx.drawImage(canvas,0,0,768,512);
       const contours=vectorize(smallCtx.getImageData(0,0,768,512).data,768,512);
-      if(!contours.length)throw new Error('图片轮廓太少，请选择边缘更清晰的背景。');
+      if(!contours.length)throw new Error('Ảnh có quá ít nét vẽ. Hãy chọn ảnh nền có đường nét rõ hơn.');
       return {artwork:image,contours};
-    }catch(error){throw new Error(error.message||'图片无法读取，请换一张图片。');}
+    }catch(error){throw new Error(error.message||'Không đọc được ảnh. Vui lòng chọn ảnh khác.');}
     finally{URL.revokeObjectURL(url);}
   }
   scope.imageSettings={load:()=>database('read'),save:images=>database('write',images),importImage};

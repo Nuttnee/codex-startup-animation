@@ -237,7 +237,7 @@
     if(Math.abs(t-lastUI)>60 || t===0 || t>=duration) {
       lastUI=t;
       $('#ratio').textContent=`${(p*100).toFixed(2).padStart(5,'0')}%`;
-      $('.sync-phase').textContent=s<6.5?'INITIALIZING':p<1?'SYNCHRONIZING':'SYNC COMPLETE';
+      $('.sync-phase').textContent=s<6.5?'ĐANG KHỞI TẠO':p<1?'ĐANG ĐỒNG BỘ':'ĐỒNG BỘ XONG';
       $('#timecode').textContent=`00:${String(Math.floor(s)).padStart(2,'0')}:${String(Math.floor(s%1*30)).padStart(2,'0')}`;
       slider.value=String(s);
       $('#elapsed').innerHTML=`${s.toFixed(1).padStart(4,'0')} <span>/ 12.0s</span>`;
@@ -245,13 +245,13 @@
       root.dataset.stage=s>=11?'shutter':s<1.15?'pulse':s<4.18?'identity':s<4.74?'dispersing':s<5.08?'scattered':s<7.18?'drawing':s<7.43?'colorize':'portrait';
     }
   }
-  function updateButton() { pause.textContent=playing?'暂停':'继续'; root.dataset.playing=String(playing); }
+  function updateButton() { pause.textContent=playing?'Tạm dừng':'Tiếp tục'; root.dataset.playing=String(playing); }
   function stop() { playing=false; cancelAnimationFrame(frame); frame=0; updateButton(); }
   function finish(skipped=false) {
     stop(); elapsed=duration; render(elapsed); completed=true;
     root.classList.add('finished'); root.dataset.completed='true';
-    pause.textContent='已结束'; pause.disabled=true;
-    $('.end-description').textContent=mode==='launch'?'正在显示 Codex…':skipped?'已跳过开场动画':'开场预览结束';
+    pause.textContent='Đã kết thúc'; pause.disabled=true;
+    $('.end-description').textContent=mode==='launch'?'Đang mở giao diện Codex…':skipped?'Đã bỏ qua hiệu ứng mở đầu':'Đã xem xong hiệu ứng';
     send('complete');
   }
   function tick(now) {
@@ -297,8 +297,8 @@
   window.launcherUI={
     openSettings,
     beginLaunch(){mode='launch';document.body.classList.add('launch-mode');replay();},
-    error(message){stop();scene.style.opacity='0';root.classList.add('finished');$('.end-description').textContent=message;$('.eyebrow').textContent='LAUNCH UNAVAILABLE';$('.end-screen h1').textContent='暂时无法打开 Codex';},
-    waiting(){ $('.end-description').textContent='正在等待 Codex 打开…'; }
+    error(message){stop();scene.style.opacity='0';root.classList.add('finished');$('.end-description').textContent=message;$('.eyebrow').textContent='KHÔNG THỂ KHỞI ĐỘNG';$('.end-screen h1').textContent='Chưa thể mở Codex';},
+    waiting(){ $('.end-description').textContent='Đang chờ Codex mở…'; }
   };
   if(native){
     document.body.classList.add('native');
@@ -308,9 +308,9 @@
   let savedImages={},pendingImages={},busy=false;
   const settings=$('#settings-dialog'),status=$('#settings-status');
   const textFields=[
-    {key:'introTitle',input:'#intro-title',target:'.boot-title',fallback:'飞行雪绒',limit:16},
-    {key:'introCaption',input:'#intro-caption',target:'.boot-caption',fallback:'CODEX INITIALIZE / TYPE-0',limit:48},
-    {key:'artworkSubtitle',input:'#artwork-subtitle',target:'#subtitle',fallback:'幽灵来到…你身边～',limit:60}
+    {key:'introTitle',input:'#intro-title',target:'.boot-title',fallback:'Bông tuyết bay',limit:16},
+    {key:'introCaption',input:'#intro-caption',target:'.boot-caption',fallback:'KHỞI ĐỘNG CODEX / LOẠI-0',limit:48},
+    {key:'artworkSubtitle',input:'#artwork-subtitle',target:'#subtitle',fallback:'Người bạn đồng hành… đã đến bên bạn',limit:60}
   ];
   const textValue=(images,field)=>typeof images[field.key]==='string'?images[field.key].slice(0,field.limit):field.fallback;
   function thumbnails(){
@@ -323,7 +323,7 @@
   function openSettings(){
     if(mode==='launch'||settings.open)return;
     hiddenPause=false;stop();pendingImages={...savedImages};thumbnails();
-    status.textContent='图片与文字保存在本机。修改后点击「保存并预览」；关闭则放弃本次修改。';
+    status.textContent='Ảnh và chữ chỉ lưu trên máy. Nhấn “Lưu và xem lại” để áp dụng; đóng để hủy thay đổi.';
     settings.returnValue='';settings.showModal();send('settings-open');
   }
   function setBusy(value){
@@ -335,7 +335,7 @@
     art.src=images.artwork||assets.artwork;$('.avatar').src=images.avatar||assets.avatar;
     await Promise.all([art,$('.avatar')].map(img=>img.decode()));
     paths=preparePaths(images.contours||window.CONTOUR_PATHS||[]);fragments=prepareFragments(paths);lastTrace=-1;
-    if(!paths.length)throw new Error('图片轮廓数据缺失');
+    if(!paths.length)throw new Error('Thiếu dữ liệu nét vẽ của ảnh');
     for(const field of textFields)$(field.target).textContent=textValue(images,field);
     $('.boot-title').classList.toggle('long-title',Array.from(textValue(images,textFields[0])).length>6);
     send('background',{image:art.src,strength:images.wallpaperStrength??42});
@@ -357,21 +357,21 @@
   });
   for(const kind of ['avatar','artwork'])$('#'+kind+'-file').addEventListener('change',async event=>{
     const file=event.target.files[0];if(!file)return;
-    setBusy(true);status.textContent=kind==='artwork'?'正在为新背景生成线稿…':'正在准备头像…';
+    setBusy(true);status.textContent=kind==='artwork'?'Đang tạo nét vẽ cho ảnh nền mới…':'Đang chuẩn bị ảnh đại diện…';
     // Let the progress text paint before the one-time contour computation.
     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
     try{
       pendingImages={...pendingImages,...await window.imageSettings.importImage(file,kind)};thumbnails();
-      status.textContent='图片已准备好，点击「保存并预览」应用。';
+      status.textContent='Ảnh đã sẵn sàng. Nhấn “Lưu và xem lại” để áp dụng.';
     }catch(error){status.textContent=error.message;}
     finally{setBusy(false);event.target.value='';}
   });
-  $('#reset-images').addEventListener('click',()=>{pendingImages={};thumbnails();status.textContent='已选用默认图片、文字和背景显现程度，点击「保存并预览」应用。';});
+  $('#reset-images').addEventListener('click',()=>{pendingImages={};thumbnails();status.textContent='Đã chọn ảnh, chữ và độ đậm mặc định. Nhấn “Lưu và xem lại” để áp dụng.';});
   $('#preview-images').addEventListener('click',async()=>{
-    setBusy(true);status.textContent='正在保存…';
+    setBusy(true);status.textContent='Đang lưu…';
     try{
       await applyImages(pendingImages);await window.imageSettings.save(pendingImages);savedImages={...pendingImages};settings.close('preview');
-    }catch(error){await applyImages(savedImages);status.textContent='保存失败，原设置已保留：'+error.message;}
+    }catch(error){await applyImages(savedImages);status.textContent='Không lưu được; đã giữ cài đặt cũ: '+error.message;}
     finally{setBusy(false);}
   });
   window.imageSettings.load().catch(()=>({})).then(async images=>{

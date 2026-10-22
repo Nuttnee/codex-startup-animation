@@ -42,7 +42,7 @@ export function installRenderer(payload, mount) {
   function show(settings=false){
     if(disposed||frame)return;
     priorFocus=document.activeElement;phase=settings?'settings':'loading';
-    frame=document.createElement('iframe');frame.id='aemeath-extension-overlay';frame.title='启动动画';
+    frame=document.createElement('iframe');frame.id='aemeath-extension-overlay';frame.title='Hiệu ứng khởi động';
     Object.assign(frame.style,{position:'fixed',inset:'0',width:'100%',height:'100%',border:'0',zIndex:'2147483646',background:'transparent',colorScheme:'dark'});
     const current=frame;
     current.addEventListener('load',()=>{
@@ -51,6 +51,7 @@ export function installRenderer(payload, mount) {
         const win=current.contentWindow,doc=win.document;
         // No inline script, eval, network server, or CSP change is needed.
         doc.documentElement.innerHTML=payload.html;
+        doc.documentElement.lang='vi';
         const css=doc.createElement('style');css.textContent=payload.css;doc.head.appendChild(css);
         win.AEMEATH_EXTERNAL=true;win.AEMEATH_ASSETS=payload.assets;win.AEMEATH_OPEN_SETTINGS=settings;
         // The function is compiled in the parent realm. A closure-bound bridge
